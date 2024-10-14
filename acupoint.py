@@ -12,7 +12,7 @@ from ancor import *
 # 处理下拉菜单选择事件的函数
 def symptom_selection(event):
     symptom_selection = event.widget.get()
-    print("症状XD:", symptom_selection)
+    print("症状:", symptom_selection)
 
 def meridian_selection(event):
     meridian_selection = event.widget.get()
