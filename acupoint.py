@@ -405,6 +405,16 @@ def update_frame():
                     ser_y = int(intersection_sy[1])
                 except Exception as e:
                     print(str(e))
+
+                # 手的方向
+                if cy0 < cy12:
+                    hand_dec = "ture"
+                    print("cy0=",cy0)
+                    print("cy12=",cy12)
+                else:
+                    hand_dec = "false"
+
+                
                 # 通过手部关键点判断手心或手背
                 if hand_label == "Left":
                     if cx17 > cx2:  # 对左手来说，关键点 2 在 17 的左边表示手心朝上
@@ -428,12 +438,12 @@ def update_frame():
 
             # 根据选择的症状进行处理
             if selected_var.get() in ["哮喘", "降血壓", "牙齒痛", "中暑", "心煩"]:
-                if not hand_results.multi_hand_landmarks or all(
-                        orientation == "back" for orientation in hand_orientations.values()):
-                    frame = cv2ImgAddText(frame, "請以手心朝向鏡頭", x, y, (255, 0, 0), 30)
-                else:
-                    if hand_orientation == "palm":
-                        if cy0 < cy12:
+                if hand_dec == "ture":
+                    if not hand_results.multi_hand_landmarks or all(
+                            orientation == "back" for orientation in hand_orientations.values()):
+                        frame = cv2ImgAddText(frame, "請以手心朝向鏡頭", x, y, (255, 0, 0), 30)
+                    else:
+                        if hand_orientation == "palm":
                             if selected_var.get() == "哮喘":
                                 frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight,
                                                                 frame, "鱼际穴", (fishmid_x, fishmid_y),
@@ -471,37 +481,128 @@ def update_frame():
                                     cv2.putText(frame, "hands 4", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
                                                 (255, 255, 0),
                                                 2)  # 顯示手勢判斷結果
-                        else:
-                            frame = cv2ImgAddText(frame, "鏡頭顛倒了", x, y, (255, 0, 0), 30)
+                
 
             elif selected_var.get() in ["落枕", "中風", "經痛", "頭痛", "手指麻木", "結膜炎", "昏迷", "心肌炎"]:
-                if not hand_results.multi_hand_landmarks or all(
-                        orientation == "palm" for orientation in hand_orientations.values()):
-                    frame = cv2ImgAddText(frame, "請以手背朝向鏡頭", x, y, (255, 0, 0), 30)
-                else:
-                    if hand_orientation == "back":
-                        if selected_var.get() == "落枕":
-                            frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
-                                                            "中渚穴", (cfmid_x, cfmid_y), massage_threshold)
-                        elif selected_var.get() == "中風":
-                            frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
-                                                            "三間穴", (tk_x, tk_y), massage_threshold)
-                        elif selected_var.get() == "經痛":
-                            frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
-                                                            "合谷穴", (cg_x, cg_y), massage_threshold)
-                        elif selected_var.get() == "頭痛":
-                            if hand_position_text == 'open':
-                                frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight,
-                                                                frame,
-                                                                "液門穴", (intersection[0], intersection[1]),
-                                                                massage_threshold)
-                            elif hand_position_text != 'open':
-                                cv2.putText(frame, "open finger", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                            (255, 255, 0),
-                                            2)  # 顯示手勢判斷結果
-                        elif selected_var.get() == "手指麻木":
-                            if abs(cx12 - cx0) < 5:
+                if hand_dec == "ture": #確認手的方向
+                    if not hand_results.multi_hand_landmarks or all(
+                            orientation == "palm" for orientation in hand_orientations.values()):
+                        frame = cv2ImgAddText(frame, "請以手背朝向鏡頭", x, y, (255, 0, 0), 30)
+                    else:
+                        if hand_orientation == "back":
+                            if selected_var.get() == "落枕":
+                                frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
+                                                                "中渚穴", (cfmid_x, cfmid_y), massage_threshold)
+                            elif selected_var.get() == "中風":
+                                frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
+                                                                "三間穴", (tk_x, tk_y), massage_threshold)
+                            elif selected_var.get() == "經痛":
+                                frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
+                                                                "合谷穴", (cg_x, cg_y), massage_threshold)
+                            elif selected_var.get() == "頭痛":
+                                if hand_position_text == 'open':
+                                    frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight,
+                                                                    frame,
+                                                                    "液門穴", (intersection[0], intersection[1]),
+                                                                    massage_threshold)
+                                elif hand_position_text != 'open':
+                                    cv2.putText(frame, "open finger", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                                (255, 255, 0),
+                                                2)  # 顯示手勢判斷結果
+                            elif selected_var.get() == "手指麻木":
+                                if abs(cx12 - cx0) < 5:
+                                    if hand_label == "Left":
+                                        if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
+                                            t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
+                                            intersection = point + t[0] * direction_vector1  # 計算交點坐標
+
+                                            # 繪製交點
+                                            intersection_x = int(intersection[0])
+                                            intersection_y = int(intersection[1])
+                                            # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
+                                            distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
+                                            # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
+                                            other = (distance // 15) * 4  # 食指中指無名指寬度
+                                            other = other / 2
+
+                                            line_length_other1 = other
+                                            point_other1 = (cx7_8, cy7_8)
+
+                                            # 計算線段終點 無名指
+                                            line_point_other = point_other1 + direction_vector * line_length_other1  # 根據方向向量計算終點
+                                            line_otherx = int(line_point_other[0])
+                                            line_othery = int(line_point_other[1])
+                                            frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
+                                                                    "商陽穴", (line_otherx, line_othery), massage_threshold) # =======================左手的=======================
+                                    elif hand_label == "Right":
+                                        if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
+                                            t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
+                                            intersection = point + t[0] * direction_vector1  # 計算交點坐標
+
+                                            # 繪製交點
+                                            intersection_x = int(intersection[0])
+                                            intersection_y = int(intersection[1])
+                                            # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
+                                            distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
+                                            # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
+                                            other = (distance // 15) * 4  # 食指中指無名指寬度
+                                            other = other / 2
+
+                                            line_length_other1 = -other
+                                            point_min = (cx19_20, cy19_20)
+                                            point_other1 = (cx7_8, cy7_8)
+
+                                            # 計算線段終點 無名指
+                                            line_point_other = point_other1 + direction_vector * line_length_other1  # 根據方向向量計算終點
+                                            line_otherx = int(line_point_other[0])
+                                            line_othery = int(line_point_other[1])
+                                        frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight,
+                                                                        frame,
+                                                                        "商陽穴", (line_otherx, line_othery), massage_threshold)
+                                else:
+                                    print('cx12 != cx0')
+                            elif selected_var.get() == "結膜炎":
                                 if hand_label == "Left":
+                                    # 檢查是否有唯一解
+                                    # ===========================================可統一======================
+                                    if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
+                                        t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
+                                        intersection = point + t[0] * direction_vector1  # 計算交點坐標
+
+                                        # 繪製交點
+                                        intersection_x = int(intersection[0])
+                                        intersection_y = int(intersection[1])
+                                        # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
+                                        distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
+                                        # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
+                                        min = (distance // 15) * 3  # 小指寬度
+                                        other = (distance // 15) * 4  # 食指中指無名指寬度
+                                        min = min / 2
+                                        other = other / 2
+
+                                        line_length_min = min  # 加負號 另一邊
+                                        line_length_mn = -min
+                                        line_length_other = -other
+                                        line_length_other1 = other
+                                        point_min = (cx19_20, cy19_20)
+                                        point_other = (cx15_16, cy15_16)
+                                        point_other1 = (cx7_8, cy7_8)
+                                        # ==========================================================
+                                        # 計算線段終點 無名指
+                                        line_point_other = point_other + direction_vector * line_length_other  # 根據方向向量計算終點
+                                        line_otherx = int(line_point_other[0])
+                                        line_othery = int(line_point_other[1])
+
+                                        frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth,
+                                                                        imgHeight, frame,
+                                                                        "關沖穴", (line_otherx, line_othery),
+                                                                        massage_threshold)  # =======================左手的=======================
+
+
+                                    else:
+                                        print("兩條線平行，沒有交點。")
+
+                                elif hand_label == "Right":
                                     if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
                                         t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
                                         intersection = point + t[0] * direction_vector1  # 計算交點坐標
@@ -516,14 +617,45 @@ def update_frame():
                                         other = other / 2
 
                                         line_length_other1 = other
+                                        point_min = (cx19_20, cy19_20)
+                                        point_other = (cx15_16, cy15_16)
                                         point_other1 = (cx7_8, cy7_8)
 
                                         # 計算線段終點 無名指
-                                        line_point_other = point_other1 + direction_vector * line_length_other1  # 根據方向向量計算終點
+                                        line_point_other = point_other + direction_vector * line_length_other1  # 根據方向向量計算終點
                                         line_otherx = int(line_point_other[0])
                                         line_othery = int(line_point_other[1])
+
+                                        frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth,
+                                                                        imgHeight, frame,
+                                                                        "關沖穴", (line_otherx, line_othery),
+                                                                        massage_threshold)  # =======================左手的=======================
+
+                            elif selected_var.get() == "昏迷":
+                                if hand_label == "Left":
+                                    if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
+                                        t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
+                                        intersection = point + t[0] * direction_vector1  # 計算交點坐標
+
+                                        # 繪製交點
+                                        intersection_x = int(intersection[0])
+                                        intersection_y = int(intersection[1])
+                                        # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
+                                        distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
+                                        # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
+                                        min = (distance//15)*3 #小指寬度
+                                        min = min/2
+
+                                        line_length_min = min  # 加負號 另一邊
+                                        line_length_mn = -min
+                                        point_min = (cx19_20, cy19_20)
+
+                                        # 計算線段終點 無名指
+                                        line_point_mn = point_min + direction_vector * line_length_mn  # 根據方向向量計算終點
+                                        line_mnx = int(line_point_mn[0])
+                                        line_mny = int(line_point_mn[1])
                                         frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
-                                                                "商陽穴", (line_otherx, line_othery), massage_threshold) # =======================左手的=======================
+                                                                "少澤穴", (line_mnx, line_mny), massage_threshold) # =======================左手的=======================
                                 elif hand_label == "Right":
                                     if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
                                         t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
@@ -535,303 +667,189 @@ def update_frame():
                                         # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
                                         distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
                                         # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
-                                        other = (distance // 15) * 4  # 食指中指無名指寬度
-                                        other = other / 2
+                                        min = (distance//15)*3 #小指寬度
+                                        min = min/2
 
-                                        line_length_other1 = -other
+                                        line_length_mn = min
                                         point_min = (cx19_20, cy19_20)
-                                        point_other1 = (cx7_8, cy7_8)
 
                                         # 計算線段終點 無名指
-                                        line_point_other = point_other1 + direction_vector * line_length_other1  # 根據方向向量計算終點
-                                        line_otherx = int(line_point_other[0])
-                                        line_othery = int(line_point_other[1])
-                                    frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight,
-                                                                    frame,
-                                                                    "商陽穴", (line_otherx, line_othery), massage_threshold)
-                            else:
-                                print('cx12 != cx0')
-                        elif selected_var.get() == "結膜炎":
-                            if hand_label == "Left":
-                                # 檢查是否有唯一解
-                                # ===========================================可統一======================
-                                if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
-                                    t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
-                                    intersection = point + t[0] * direction_vector1  # 計算交點坐標
+                                        line_point_mn = point_min + direction_vector * line_length_mn  # 根據方向向量計算終點
+                                        line_mnx = int(line_point_mn[0])
+                                        line_mny = int(line_point_mn[1])
+                                        frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
+                                                                "少澤穴", (line_mnx, line_mny), massage_threshold)
 
-                                    # 繪製交點
-                                    intersection_x = int(intersection[0])
-                                    intersection_y = int(intersection[1])
-                                    # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
-                                    distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
-                                    # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
-                                    min = (distance // 15) * 3  # 小指寬度
-                                    other = (distance // 15) * 4  # 食指中指無名指寬度
-                                    min = min / 2
-                                    other = other / 2
+                            elif selected_var.get() == "心肌炎":
+                                if hand_label == "Left":
+                                    if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
+                                        t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
+                                        intersection = point + t[0] * direction_vector1  # 計算交點坐標
 
-                                    line_length_min = min  # 加負號 另一邊
-                                    line_length_mn = -min
-                                    line_length_other = -other
-                                    line_length_other1 = other
-                                    point_min = (cx19_20, cy19_20)
-                                    point_other = (cx15_16, cy15_16)
-                                    point_other1 = (cx7_8, cy7_8)
-                                    # ==========================================================
-                                    # 計算線段終點 無名指
-                                    line_point_other = point_other + direction_vector * line_length_other  # 根據方向向量計算終點
-                                    line_otherx = int(line_point_other[0])
-                                    line_othery = int(line_point_other[1])
+                                        # 繪製交點
+                                        intersection_x = int(intersection[0])
+                                        intersection_y = int(intersection[1])
+                                        # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
+                                        distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
+                                        # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
+                                        min = (distance//15)*3 #小指寬度
+                                        min = min/2
 
-                                    frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth,
-                                                                    imgHeight, frame,
-                                                                    "關沖穴", (line_otherx, line_othery),
-                                                                    massage_threshold)  # =======================左手的=======================
+                                        line_length_mn = min
+                                        point_min = (cx19_20, cy19_20)
 
+                                        # 計算線段終點 無名指
+                                        line_point_mn = point_min + direction_vector * line_length_mn  # 根據方向向量計算終點
+                                        line_mnx = int(line_point_mn[0])
+                                        line_mny = int(line_point_mn[1])
+                                        frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
+                                                                "少衝穴", (line_mnx, line_mny), massage_threshold)
 
-                                else:
-                                    print("兩條線平行，沒有交點。")
+                                    # =======================左手的=======================
+                                elif hand_label == "Right":
+                                    if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
+                                        t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
+                                        intersection = point + t[0] * direction_vector1  # 計算交點坐標
 
-                            elif hand_label == "Right":
-                                if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
-                                    t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
-                                    intersection = point + t[0] * direction_vector1  # 計算交點坐標
+                                        # 繪製交點
+                                        intersection_x = int(intersection[0])
+                                        intersection_y = int(intersection[1])
+                                        # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
+                                        distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
+                                        # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
+                                        min = (distance//15)*3 #小指寬度
+                                        min = min/2
 
-                                    # 繪製交點
-                                    intersection_x = int(intersection[0])
-                                    intersection_y = int(intersection[1])
-                                    # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
-                                    distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
-                                    # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
-                                    other = (distance // 15) * 4  # 食指中指無名指寬度
-                                    other = other / 2
+                                        line_length_mn = -min
+                                        point_min = (cx19_20, cy19_20)
 
-                                    line_length_other1 = other
-                                    point_min = (cx19_20, cy19_20)
-                                    point_other = (cx15_16, cy15_16)
-                                    point_other1 = (cx7_8, cy7_8)
-
-                                    # 計算線段終點 無名指
-                                    line_point_other = point_other + direction_vector * line_length_other1  # 根據方向向量計算終點
-                                    line_otherx = int(line_point_other[0])
-                                    line_othery = int(line_point_other[1])
-
-                                    frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth,
-                                                                    imgHeight, frame,
-                                                                    "關沖穴", (line_otherx, line_othery),
-                                                                    massage_threshold)  # =======================左手的=======================
-
-                        elif selected_var.get() == "昏迷":
-                            if hand_label == "Left":
-                                if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
-                                    t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
-                                    intersection = point + t[0] * direction_vector1  # 計算交點坐標
-
-                                    # 繪製交點
-                                    intersection_x = int(intersection[0])
-                                    intersection_y = int(intersection[1])
-                                    # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
-                                    distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
-                                    # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
-                                    min = (distance//15)*3 #小指寬度
-                                    min = min/2
-
-                                    line_length_min = min  # 加負號 另一邊
-                                    line_length_mn = -min
-                                    point_min = (cx19_20, cy19_20)
-
-                                    # 計算線段終點 無名指
-                                    line_point_mn = point_min + direction_vector * line_length_mn  # 根據方向向量計算終點
-                                    line_mnx = int(line_point_mn[0])
-                                    line_mny = int(line_point_mn[1])
-                                    frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
-                                                            "少澤穴", (line_mnx, line_mny), massage_threshold) # =======================左手的=======================
-                            elif hand_label == "Right":
-                                if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
-                                    t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
-                                    intersection = point + t[0] * direction_vector1  # 計算交點坐標
-
-                                    # 繪製交點
-                                    intersection_x = int(intersection[0])
-                                    intersection_y = int(intersection[1])
-                                    # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
-                                    distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
-                                    # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
-                                    min = (distance//15)*3 #小指寬度
-                                    min = min/2
-
-                                    line_length_mn = min
-                                    point_min = (cx19_20, cy19_20)
-
-                                    # 計算線段終點 無名指
-                                    line_point_mn = point_min + direction_vector * line_length_mn  # 根據方向向量計算終點
-                                    line_mnx = int(line_point_mn[0])
-                                    line_mny = int(line_point_mn[1])
-                                    frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
-                                                            "少澤穴", (line_mnx, line_mny), massage_threshold)
-
-                        elif selected_var.get() == "心肌炎":
-                            if hand_label == "Left":
-                                if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
-                                    t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
-                                    intersection = point + t[0] * direction_vector1  # 計算交點坐標
-
-                                    # 繪製交點
-                                    intersection_x = int(intersection[0])
-                                    intersection_y = int(intersection[1])
-                                    # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
-                                    distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
-                                    # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
-                                    min = (distance//15)*3 #小指寬度
-                                    min = min/2
-
-                                    line_length_mn = min
-                                    point_min = (cx19_20, cy19_20)
-
-                                    # 計算線段終點 無名指
-                                    line_point_mn = point_min + direction_vector * line_length_mn  # 根據方向向量計算終點
-                                    line_mnx = int(line_point_mn[0])
-                                    line_mny = int(line_point_mn[1])
-                                    frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
-                                                            "少衝穴", (line_mnx, line_mny), massage_threshold)
-
-                                # =======================左手的=======================
-                            elif hand_label == "Right":
-                                if np.linalg.det(A) != 0:  # 如果行列式不為零，則兩條線有唯一交點
-                                    t = np.linalg.solve(A, b)  # 求解線性方程組，得到 t1 和 t2
-                                    intersection = point + t[0] * direction_vector1  # 計算交點坐標
-
-                                    # 繪製交點
-                                    intersection_x = int(intersection[0])
-                                    intersection_y = int(intersection[1])
-                                    # cv2.circle(frame, (intersection_x, intersection_y), 5, (0, 255, 0), -1)  # 用綠色繪製交點
-                                    distance = np.sqrt((intersection_x - cx6) ** 2 + (intersection_y - cy6) ** 2)
-                                    # print(f"交點和(cx6, cy6)之間的距離為: {distance}")
-                                    min = (distance//15)*3 #小指寬度
-                                    min = min/2
-
-                                    line_length_mn = -min
-                                    point_min = (cx19_20, cy19_20)
-
-                                    # 計算線段終點 無名指
-                                    line_point_mn = point_min + direction_vector * line_length_mn  # 根據方向向量計算終點
-                                    line_mnx = int(line_point_mn[0])
-                                    line_mny = int(line_point_mn[1])
-                                    frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
-                                                            "少衝穴", (line_mnx, line_mny), massage_threshold)
+                                        # 計算線段終點 無名指
+                                        line_point_mn = point_min + direction_vector * line_length_mn  # 根據方向向量計算終點
+                                        line_mnx = int(line_point_mn[0])
+                                        line_mny = int(line_point_mn[1])
+                                        frame = handle_acupoint_massage(hand_label, hand_landmarks_dict, imgWidth, imgHeight, frame,
+                                                               "少衝穴", (line_mnx, line_mny), massage_threshold)
+                else:
+                    frame = cv2ImgAddText(frame, "鏡頭顛倒了", x, y, (255, 0, 0), 30)
 
             elif selected_var.get() in ["手陽明大腸經", "手少陽三焦經", "手太陽小腸經"]:
-                if not hand_results.multi_hand_landmarks or all(
-                        orientation == "palm" for orientation in hand_orientations.values()):
-                    frame = cv2ImgAddText(frame, "請以手背朝向鏡頭", x, y, (255, 0, 0), 30)
+                if hand_dec == "ture":
+                    if not hand_results.multi_hand_landmarks or all(
+                            orientation == "palm" for orientation in hand_orientations.values()):
+                        frame = cv2ImgAddText(frame, "請以手背朝向鏡頭", x, y, (255, 0, 0), 30)
+                    else:
+                        if hand_orientation == "back":
+                            if selected_var.get() == "手陽明大腸經":
+                                if hand_label == "Left":
+                                    cv2.circle(frame, (syl_x, syl_y), 5, blue_color, -1)
+                                    frame = cv2ImgAddText(frame, "商陽穴", syl_x, syl_y, (255, 0, 0),
+                                                        20)  # =======================左手的=======================
+                                    cv2.line(frame, (syl_x, syl_y), (tk_x, tk_y), purple_color, 2)
+                                elif hand_label == "Right":
+                                    cv2.circle(frame, (syr_x, syr_y), 5, blue_color, -1)
+                                    frame = cv2ImgAddText(frame, "商陽穴", syr_x, syr_y, (255, 0, 0), 20)
+                                    cv2.line(frame, (syr_x, syr_y), (tk_x, tk_y), purple_color, 2)
+
+                                cv2.circle(frame, (cg_x, cg_y), 5, blue_color, -1)
+                                frame = cv2ImgAddText(frame, "合谷穴", cg_x, cg_y, (255, 0, 0), 20)
+                                cv2.circle(frame, (tk_x, tk_y), 5, blue_color, -1)
+                                frame = cv2ImgAddText(frame, "三間穴", tk_x, tk_y, (255, 0, 0), 20)
+
+                                cv2.line(frame, (cg_x, cg_y), (tk_x, tk_y), purple_color, 2)
+
+                            elif selected_var.get() == "手少陽三焦經":
+                                if hand_label == "Left":
+                                    cv2.circle(frame, (kcl_x, kcl_y), 5, blue_color, -1)
+                                    frame = cv2ImgAddText(frame, "關衝穴", kcl_x, kcl_y, (255, 0, 0),
+                                                        20)  # =======================左手的=======================
+                                    cv2.line(frame, (kcl_x, kcl_y), (intersection[0], intersection[1]), purple_color, 2)
+                                elif hand_label == "Right":
+                                    cv2.circle(frame, (kcr_x, kcr_y), 5, blue_color, -1)
+                                    frame = cv2ImgAddText(frame, "關衝穴", kcr_x, kcr_y, (255, 0, 0), 20)
+                                    cv2.line(frame, (kcr_x, kcr_y), (intersection[0], intersection[1]), purple_color, 2)
+
+                                cv2.circle(frame, (intersection[0], intersection[1]), 5, blue_color, -1)
+                                frame = cv2ImgAddText(frame, "液門穴", intersection[0], intersection[1], (255, 0, 0), 20)
+                                cv2.circle(frame, (cfmid_x, cfmid_y), 5, blue_color, -1)
+                                frame = cv2ImgAddText(frame, "中渚穴", cfmid_x, cfmid_y, (255, 0, 0), 20)
+
+                                cv2.line(frame, (intersection[0], intersection[1]), (cfmid_x, cfmid_y), purple_color, 2)
+
+                            elif selected_var.get() == "手太陽小腸經":
+                                if hand_label == "Left":
+                                    cv2.circle(frame, (sel_x, sel_y), 5, blue_color, -1)
+                                    frame = cv2ImgAddText(frame, "少澤穴", sel_x, sel_y, (255, 0, 0),
+                                                        20)  # =======================左手的=======================
+                                elif hand_label == "Right":
+                                    cv2.circle(frame, (ser_x, ser_y), 5, blue_color, -1)
+                                    frame = cv2ImgAddText(frame, "少澤穴", ser_x, ser_y, (255, 0, 0), 20)
                 else:
-                    if hand_orientation == "back":
-                        if selected_var.get() == "手陽明大腸經":
-                            if hand_label == "Left":
-                                cv2.circle(frame, (syl_x, syl_y), 5, blue_color, -1)
-                                frame = cv2ImgAddText(frame, "商陽穴", syl_x, syl_y, (255, 0, 0),
-                                                      20)  # =======================左手的=======================
-                                cv2.line(frame, (syl_x, syl_y), (tk_x, tk_y), purple_color, 2)
-                            elif hand_label == "Right":
-                                cv2.circle(frame, (syr_x, syr_y), 5, blue_color, -1)
-                                frame = cv2ImgAddText(frame, "商陽穴", syr_x, syr_y, (255, 0, 0), 20)
-                                cv2.line(frame, (syr_x, syr_y), (tk_x, tk_y), purple_color, 2)
-
-                            cv2.circle(frame, (cg_x, cg_y), 5, blue_color, -1)
-                            frame = cv2ImgAddText(frame, "合谷穴", cg_x, cg_y, (255, 0, 0), 20)
-                            cv2.circle(frame, (tk_x, tk_y), 5, blue_color, -1)
-                            frame = cv2ImgAddText(frame, "三間穴", tk_x, tk_y, (255, 0, 0), 20)
-
-                            cv2.line(frame, (cg_x, cg_y), (tk_x, tk_y), purple_color, 2)
-
-                        elif selected_var.get() == "手少陽三焦經":
-                            if hand_label == "Left":
-                                cv2.circle(frame, (kcl_x, kcl_y), 5, blue_color, -1)
-                                frame = cv2ImgAddText(frame, "關衝穴", kcl_x, kcl_y, (255, 0, 0),
-                                                      20)  # =======================左手的=======================
-                                cv2.line(frame, (kcl_x, kcl_y), (intersection[0], intersection[1]), purple_color, 2)
-                            elif hand_label == "Right":
-                                cv2.circle(frame, (kcr_x, kcr_y), 5, blue_color, -1)
-                                frame = cv2ImgAddText(frame, "關衝穴", kcr_x, kcr_y, (255, 0, 0), 20)
-                                cv2.line(frame, (kcr_x, kcr_y), (intersection[0], intersection[1]), purple_color, 2)
-
-                            cv2.circle(frame, (intersection[0], intersection[1]), 5, blue_color, -1)
-                            frame = cv2ImgAddText(frame, "液門穴", intersection[0], intersection[1], (255, 0, 0), 20)
-                            cv2.circle(frame, (cfmid_x, cfmid_y), 5, blue_color, -1)
-                            frame = cv2ImgAddText(frame, "中渚穴", cfmid_x, cfmid_y, (255, 0, 0), 20)
-
-                            cv2.line(frame, (intersection[0], intersection[1]), (cfmid_x, cfmid_y), purple_color, 2)
-
-                        elif selected_var.get() == "手太陽小腸經":
-                            if hand_label == "Left":
-                                cv2.circle(frame, (sel_x, sel_y), 5, blue_color, -1)
-                                frame = cv2ImgAddText(frame, "少澤穴", sel_x, sel_y, (255, 0, 0),
-                                                      20)  # =======================左手的=======================
-                            elif hand_label == "Right":
-                                cv2.circle(frame, (ser_x, ser_y), 5, blue_color, -1)
-                                frame = cv2ImgAddText(frame, "少澤穴", ser_x, ser_y, (255, 0, 0), 20)
+                    frame = cv2ImgAddText(frame, "鏡頭顛倒了", x, y, (255, 0, 0), 30)   
 
 
             elif selected_var.get() in ["手太陰肺經", "手厥陰心包經", "手少陰心經"]:
-                if not hand_results.multi_hand_landmarks or all(
-                        orientation == "back" for orientation in hand_orientations.values()):
-                    frame = cv2ImgAddText(frame, "請以手心朝向鏡頭", x, y, (255, 0, 0), 30)
-                else:
-                    if hand_orientation == "palm":
-                        if selected_var.get() == "手太陰肺經":
-                            if hand_position_text == '4':
-                                if hand_label == "Left":
-                                    cv2.circle(frame, (sml_x, sml_y), 5, blue_color, -1)
-                                    frame = cv2ImgAddText(frame, "少商穴", sml_x, sml_y, (255, 0, 0),
-                                                          20)
-                                    cv2.line(frame, (sml_x, sml_y), (fishmid_x, fishmid_y), purple_color, 2)
-                                elif hand_label == "Right":
-                                    cv2.circle(frame, (smr_x, smr_y), 5, blue_color, -1)
-                                    frame = cv2ImgAddText(frame, "少商穴", smr_x, smr_y, (255, 0, 0), 20)
+                if hand_dec == "ture":
+                    if not hand_results.multi_hand_landmarks or all(
+                            orientation == "back" for orientation in hand_orientations.values()):
+                        frame = cv2ImgAddText(frame, "請以手心朝向鏡頭", x, y, (255, 0, 0), 30)
+                    else:
+                        if hand_orientation == "palm":
+                            if selected_var.get() == "手太陰肺經":
+                                if hand_position_text == '4':
+                                    if hand_label == "Left":
+                                        cv2.circle(frame, (sml_x, sml_y), 5, blue_color, -1)
+                                        frame = cv2ImgAddText(frame, "少商穴", sml_x, sml_y, (255, 0, 0),
+                                                            20)
+                                        cv2.line(frame, (sml_x, sml_y), (fishmid_x, fishmid_y), purple_color, 2)
+                                    elif hand_label == "Right":
+                                        cv2.circle(frame, (smr_x, smr_y), 5, blue_color, -1)
+                                        frame = cv2ImgAddText(frame, "少商穴", smr_x, smr_y, (255, 0, 0), 20)
+                                        cv2.line(frame, (smr_x, smr_y), (fishmid_x, fishmid_y), purple_color, 2)
+
                                     cv2.line(frame, (smr_x, smr_y), (fishmid_x, fishmid_y), purple_color, 2)
+                                elif hand_position_text != '4':
+                                    cv2.putText(frame, "currvl bigfinger", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                                (255, 255, 0),
+                                                2)  # 顯示手勢判斷結果
 
-                                cv2.line(frame, (smr_x, smr_y), (fishmid_x, fishmid_y), purple_color, 2)
-                            elif hand_position_text != '4':
-                                cv2.putText(frame, "currvl bigfinger", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                            (255, 255, 0),
-                                            2)  # 顯示手勢判斷結果
+                                cv2.circle(frame, (fishmid_x, fishmid_y), 5, blue_color, -1)
+                                frame = cv2ImgAddText(frame, "魚際穴", fishmid_x, fishmid_y, (255, 0, 0), 20)
+                                # cv2.line(frame, (smid_x, smid_y), (fishmid_x, fishmid_y), purple_color, 2)
 
-                            cv2.circle(frame, (fishmid_x, fishmid_y), 5, blue_color, -1)
-                            frame = cv2ImgAddText(frame, "魚際穴", fishmid_x, fishmid_y, (255, 0, 0), 20)
-                            # cv2.line(frame, (smid_x, smid_y), (fishmid_x, fishmid_y), purple_color, 2)
+                            elif selected_var.get() == "手厥陰心包經":
+                                if hand_position_text == '7':
+                                    cv2.circle(frame, (cx12, cy12), 5, blue_color, -1)
+                                    frame = cv2ImgAddText(frame, "中衝穴", cx12, cy12, (255, 0, 0),
+                                                        20)
+                                elif hand_position_text != '7':
+                                    cv2.putText(frame, "currvl midfinger", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                                (255, 255, 0),
+                                                2)  # 顯示手勢判斷結果
 
-                        elif selected_var.get() == "手厥陰心包經":
-                            if hand_position_text == '7':
-                                cv2.circle(frame, (cx12, cy12), 5, blue_color, -1)
-                                frame = cv2ImgAddText(frame, "中衝穴", cx12, cy12, (255, 0, 0),
-                                                      20)
-                            elif hand_position_text != '7':
-                                cv2.putText(frame, "currvl midfinger", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                            (255, 255, 0),
-                                            2)  # 顯示手勢判斷結果
+                                cv2.circle(frame, (lgmid_x, lgmid_y), 5, blue_color, -1)
+                                frame = cv2ImgAddText(frame, "勞宮穴", lgmid_x, lgmid_y, (255, 0, 0), 20)
+                                cv2.line(frame, (cx12, cy12), (lgmid_x, lgmid_y), purple_color, 2)
 
-                            cv2.circle(frame, (lgmid_x, lgmid_y), 5, blue_color, -1)
-                            frame = cv2ImgAddText(frame, "勞宮穴", lgmid_x, lgmid_y, (255, 0, 0), 20)
-                            cv2.line(frame, (cx12, cy12), (lgmid_x, lgmid_y), purple_color, 2)
+                            elif selected_var.get() == "手少陰心經":
+                                if hand_position_text == '9':
+                                    if hand_label == "Left":
+                                        cv2.circle(frame, (shl_x, shl_y), 5, blue_color, -1)
+                                        frame = cv2ImgAddText(frame, "少衝穴", shl_x, shl_y, (255, 0, 0),
+                                                            20)
+                                        cv2.line(frame, (shl_x, shl_y), (cfmid_x, cfmid_y), purple_color, 2)
+                                    elif hand_label == "Right":
+                                        cv2.circle(frame, (shr_x, shr_y), 5, blue_color, -1)
+                                        frame = cv2ImgAddText(frame, "少衝穴", shr_x, shr_y, (255, 0, 0), 20)
+                                        cv2.line(frame, (shr_x, shr_y), (cfmid_x, cfmid_y), purple_color, 2)
 
-                        elif selected_var.get() == "手少陰心經":
-                            if hand_position_text == '9':
-                                if hand_label == "Left":
-                                    cv2.circle(frame, (shl_x, shl_y), 5, blue_color, -1)
-                                    frame = cv2ImgAddText(frame, "少衝穴", shl_x, shl_y, (255, 0, 0),
-                                                          20)
-                                    cv2.line(frame, (shl_x, shl_y), (cfmid_x, cfmid_y), purple_color, 2)
-                                elif hand_label == "Right":
-                                    cv2.circle(frame, (shr_x, shr_y), 5, blue_color, -1)
-                                    frame = cv2ImgAddText(frame, "少衝穴", shr_x, shr_y, (255, 0, 0), 20)
-                                    cv2.line(frame, (shr_x, shr_y), (cfmid_x, cfmid_y), purple_color, 2)
+                                elif hand_position_text != '9':
+                                    cv2.putText(frame, "currvl smallfinger", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                                (255, 255, 0),2)  # 顯示手勢判斷結果
 
-                            elif hand_position_text != '9':
-                                cv2.putText(frame, "currvl smallfinger", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                            (255, 255, 0),2)  # 顯示手勢判斷結果
-
-                            cv2.circle(frame, (cfmid_x, cfmid_y), 5, blue_color, -1)
-                            frame = cv2ImgAddText(frame, "少府穴", cfmid_x, cfmid_y, (255, 0, 0), 20)
+                                cv2.circle(frame, (cfmid_x, cfmid_y), 5, blue_color, -1)
+                                frame = cv2ImgAddText(frame, "少府穴", cfmid_x, cfmid_y, (255, 0, 0), 20)
+                else:
+                    frame = cv2ImgAddText(frame, "鏡頭顛倒了", x, y, (255, 0, 0), 30)
 
 
 
