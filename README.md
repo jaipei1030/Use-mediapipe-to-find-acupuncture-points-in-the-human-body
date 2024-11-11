@@ -9,6 +9,7 @@ https://github.com/user-attachments/assets/6a5f5ed8-fcd9-498a-b7ac-2dbba1ae74a0
 # Mediapipe hands 原理:
 **• 手部區域檢測：**
 Mediapipe 使用基於機器學習的手部檢測模型，來快速檢測並識別圖像中的手部區域。這個階段主要是通過回歸模型定位手部的邊界框。
+
 **• 手部關鍵點定位：**
 在檢測到手部的基礎上，Mediapipe 使用卷積神經網路（CNN）對手部的關鍵點（landmarks）進行精確定位。每隻手由 21 個關鍵點組成，每個點都有 3D 座標 (x, y, z)，其中 (x, y) 是圖像上的 2D 座標，z 表示手部深度。
 
