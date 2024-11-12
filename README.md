@@ -1,9 +1,14 @@
 # Acupoint-AR-and-related-health-care-applications
 Using mediapipe for acupoint AR and related health care applications
 
-![螢幕擷取畫面 2024-08-18 144719](https://github.com/user-attachments/assets/d964de68-5172-476f-9ec5-0ccab074803d)
-![螢幕擷取畫面 2024-08-18 160011](https://github.com/user-attachments/assets/252e1add-3ad5-4725-a360-9ab47982930b)
+# 成果展現:
 https://github.com/user-attachments/assets/6a5f5ed8-fcd9-498a-b7ac-2dbba1ae74a0
+
+# 設備:
+1.外接攝像頭
+2.Python
+3.需在Python中下載mediapipe、tkinter、PIL和numpy等套件
+
 # 摘要:
 # 引言:
 # Mediapipe hands 原理:
@@ -18,4 +23,5 @@ Mediapipe 使用基於機器學習的手部檢測模型，來快速檢測並識�
 # 翻譯方式:
 依照中醫穴位定位的說明，自行推論出用mediapipe hands 如何找到穴位，再到網路上查找中醫師所拍攝的穴位照片，以驗證穴位是否正確。
 
-
+![螢幕擷取畫面 2024-08-18 144719](https://github.com/user-attachments/assets/d964de68-5172-476f-9ec5-0ccab074803d)
+![螢幕擷取畫面 2024-08-18 160011](https://github.com/user-attachments/assets/252e1add-3ad5-4725-a360-9ab47982930b)
