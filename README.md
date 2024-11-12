@@ -6,7 +6,9 @@ https://github.com/user-attachments/assets/6a5f5ed8-fcd9-498a-b7ac-2dbba1ae74a0
 
 # 設備:
 1.外接攝像頭
+
 2.Python
+
 3.需在Python中下載mediapipe、tkinter、PIL和numpy等套件
 
 # 摘要:
