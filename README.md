@@ -23,6 +23,9 @@ Mediapipe 使用基於機器學習的手部檢測模型，來快速檢測並識�
 
 選擇此模型來翻譯穴位位置是因為他擁有的21個關鍵點位於手部的關節處，而穴位通常位於骨頭和骨頭或是筋和筋之間，而筋的端點又是骨頭，因此mediapipe hands恰好吻合。
 
+**Mediapipe hands連結**
+https://chuoling.github.io/mediapipe/solutions/hands.html
+
 # 未來應用 : 
 1.軟體：開發專屬的App，方便使用者隨時掌握穴位定位資訊並進行自我保健。
 
