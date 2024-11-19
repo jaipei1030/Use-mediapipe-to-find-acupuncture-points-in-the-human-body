@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 import mediapipe as mp
 import numpy as np
 import time
-from datetime import datetime, timedelta  # 用于显示时钟
+from datetime import datetime, timedelta  # 用於顯示時鐘
 from count import *
 from ancor import *
 
