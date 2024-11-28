@@ -37,7 +37,9 @@ https://chuoling.github.io/mediapipe/solutions/hands.html
 
 # 翻譯方式:
 依照中醫穴位定位的說明，自行推論出用mediapipe hands 如何找到穴位，再到網路上查找中醫師所拍攝的穴位照片，以驗證穴位是否正確。
-詳見穴位pdf
+
+詳見檢測穴位.pdf
+https://github.com/jaipei1030/Use-mediapipe-to-find-acupuncture-points-in-the-human-body/blob/main/%E6%AA%A2%E6%B8%AC%E7%A9%B4%E4%BD%8D.pdf
 
 # 結論 : 
 從照片驗證的結果來看，確實可以使用Mediapipe Hands準確地定位穴位。然而，鑒於穴位的醫療用途，若要進一步推廣此應用，仍然需要專業醫師的檢測與驗證。因此，本專題目前僅限於教育用途。由於後續新增的穴位難以找到符合五指張開且手掌不過度傾斜的照片，且部分穴位需透過動態方式才能定位，無法僅依照片進行驗證，為了確保穴位定位的準確性，將實際拜訪中醫師進行專業檢測。
