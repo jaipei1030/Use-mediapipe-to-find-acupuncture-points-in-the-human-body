@@ -45,7 +45,7 @@ Mediapipe Hands 是 Google 提供的 Mediapipe 框架中的一個模組，專注
 
 Mediapipe Hands 是影像處理領域中極具潛力的工具，適合用於開發多種手勢識別與人機互動應用。
 
-**Mediapipe hands官網連結**
+**官網連結**
 https://chuoling.github.io/mediapipe/solutions/hands.html
 
 # 未來應用 : 
