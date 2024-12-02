@@ -5,11 +5,10 @@ Using mediapipe for acupoint AR and related health care applications
 https://github.com/user-attachments/assets/6a5f5ed8-fcd9-498a-b7ac-2dbba1ae74a0
 
 # 設備:
-1.外接攝像頭
 
-2.Python
-
-3.需在Python中下載mediapipe、tkinter、PIL和numpy等套件
+• 外接攝像頭
+• Python
+• 需在Python中下載mediapipe、tkinter、PIL和numpy等套件
 
 # 摘要:
 穴位查找一直是許多希望進行身體保健的民眾所面臨的一大難題。網路上關於穴位定位的資訊常伴隨大量專業醫學術語，對一般民眾而言既難以理解又缺乏實用性。因此，本專題旨在結合科技與中醫智慧，將傳統的穴位查找方法數位化。通過 Mediapipe Hands 技術，準確輸出穴位位置，並透過即時影像將這些穴位清晰地標示在使用者的手上。這種直觀的方式，不僅省去了民眾學習複雜穴位知識的麻煩，更大幅提升了進行穴位按摩的便利性與效率。
