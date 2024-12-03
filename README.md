@@ -4,6 +4,11 @@ Using mediapipe for acupoint AR and related health care applications
 # 成果展現:
 https://github.com/user-attachments/assets/6a5f5ed8-fcd9-498a-b7ac-2dbba1ae74a0
 
+• 症狀按摩紓緩
+
+• 經絡學習
+
+• 當前時辰
 # 設備:
 
 • 外接攝像頭
