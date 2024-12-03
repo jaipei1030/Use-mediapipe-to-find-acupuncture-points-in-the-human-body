@@ -3,6 +3,8 @@ Using mediapipe for acupoint AR and related health care applications
 
 # 成果展現:
 https://github.com/user-attachments/assets/6a5f5ed8-fcd9-498a-b7ac-2dbba1ae74a0
+
+
 上方分別有三個按鈕
 • 症狀按摩紓緩:使用者可從下拉選單中選擇特定症狀，程式將自動顯示與該症狀相關的穴位位置。這種設計讓使用者能快速找到對應的穴位，簡化中醫穴位查找的過程，提升應用的效率與便利性。
 
